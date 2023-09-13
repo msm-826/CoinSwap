@@ -1,4 +1,4 @@
-package com.project.coinswap.ui.theme
+package com.project.coinswap.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
