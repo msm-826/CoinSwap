@@ -5,6 +5,7 @@
     <dimen name="padding_large">16dp</dimen>
     <dimen name="padding_very_large">32dp</dimen>
 
+    <dimen name="padding_between_keys">35dp</dimen>
     <dimen name="padding_between_currency_card">12dp</dimen>
     <dimen name="sync_icon_position">40dp</dimen>
 </resources>

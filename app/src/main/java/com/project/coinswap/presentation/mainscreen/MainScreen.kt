@@ -2,15 +2,20 @@ package com.project.coinswap.presentation.mainscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -23,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,13 +43,18 @@ import com.project.coinswap.presentation.theme.CoinSwapTheme
 
 @Composable
 fun MainScreen() {
+    val keys = listOf(
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "C"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(
                 horizontal = dimensionResource(id = R.dimen.padding_large),
                 vertical = dimensionResource(id = R.dimen.padding_medium)
-            )
+            ),
+        verticalArrangement = Arrangement.SpaceAround
     ) {
         Text( //title
             text = stringResource(R.string.coinswap),
@@ -54,8 +65,8 @@ fun MainScreen() {
             modifier = Modifier.fillMaxWidth()
         )
         Box(
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_very_large))
+            contentAlignment = Alignment.CenterStart,/*
+            modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_very_large))*/
         ) {
             Column {
                 CurrencyCard( //first currency card
@@ -90,6 +101,23 @@ fun MainScreen() {
                         .padding(dimensionResource(id = R.dimen.padding_medium))
                         .size(25.dp),
                     tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .padding(horizontal = dimensionResource(id = R.dimen.padding_between_keys))
+        ) {
+            items(keys) {key ->
+                KeyboardButton(
+                    key = key,
+                    backgroundColor = when(key) {
+                        "C" -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    onClick = {},
+                    modifier = Modifier.aspectRatio(1f)
                 )
             }
         }
@@ -157,6 +185,28 @@ fun CurrencyLabel(
             text = currencyName,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun KeyboardButton(
+    key: String,
+    backgroundColor: Color,
+    onClick: (String) -> Unit,
+    modifier: Modifier =Modifier
+) {
+    Box(
+        modifier = modifier
+            .padding(dimensionResource(id = R.dimen.padding_medium))
+            .clip(CircleShape)
+            .background(color = backgroundColor)
+            .clickable { onClick(key) },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = key,
+            style = MaterialTheme.typography.headlineLarge
         )
     }
 }
