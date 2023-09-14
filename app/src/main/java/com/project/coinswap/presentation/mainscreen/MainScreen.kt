@@ -1,7 +1,9 @@
 package com.project.coinswap.presentation.mainscreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,27 +27,38 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.coinswap.R
-import com.project.coinswap.presentation.theme.CoinSwapTheme
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    state: MainScreenState,
+    onEvent: (MainScreenEvent) -> Unit
+) {
+
     val keys = listOf(
         "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "C"
     )
+
+    val context = LocalContext.current
+    LaunchedEffect(key1 = state.error) {
+        if (state.error != null) {
+            Toast.makeText(context, state.error, Toast.LENGTH_LONG).show()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -70,20 +83,32 @@ fun MainScreen() {
         ) {
             Column {
                 CurrencyCard( //first currency card
-                    currencyCode = "INR",
-                    currencyName = "India Rupee",
-                    currencyValue = "82.4",
+                    currencyCode = state.fromCurrencyCode,
+                    currencyName = state.currencyRates[state.fromCurrencyCode]?.name ?: "",
+                    currencyValue = state.fromCurrencyValue,
+                    color = if (state.selection == SelectionState.FROM) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
                     onDropdownIconClicked = { },
+                    onCurrencySelect = { onEvent(MainScreenEvent.FromCurrencySelect) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier
                     .height(dimensionResource(id = R.dimen.padding_between_currency_card))
                 )
                 CurrencyCard( //second currency card
-                    currencyCode = "USD",
-                    currencyName = "US Dollar",
-                    currencyValue = "1.0",
+                    currencyCode = state.toCurrencyCode,
+                    currencyName = state.currencyRates[state.toCurrencyCode]?.name ?: "",
+                    currencyValue = state.toCurrencyValue,
+                    color = if (state.selection == SelectionState.TO) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
                     onDropdownIconClicked = { },
+                    onCurrencySelect = { onEvent(MainScreenEvent.ToCurrencySelect) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -91,7 +116,7 @@ fun MainScreen() {
                 modifier = Modifier
                     .padding(start = dimensionResource(id = R.dimen.sync_icon_position))
                     .clip(CircleShape)
-                    .clickable { }
+                    .clickable { onEvent(MainScreenEvent.SwapIconClicked) }
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 Icon(
@@ -116,7 +141,9 @@ fun MainScreen() {
                         "C" -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
-                    onClick = {},
+                    onClick = {
+                        onEvent(MainScreenEvent.NumberButtonClicked(key))
+                    },
                     modifier = Modifier.aspectRatio(1f)
                 )
             }
@@ -129,7 +156,9 @@ fun CurrencyCard(
     currencyCode: String,
     currencyName: String,
     currencyValue: String,
+    color: Color,
     onDropdownIconClicked: () -> Unit,
+    onCurrencySelect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -152,7 +181,13 @@ fun CurrencyCard(
             )
             Text( //amount aligned to the end
                 text = currencyValue,
-                fontSize = 40.sp
+                fontSize = 40.sp,
+                modifier = Modifier.clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null,
+                    onClick = onCurrencySelect
+                ),
+                color = color
             )
         }
     }
@@ -211,10 +246,14 @@ fun KeyboardButton(
     }
 }
 
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreenPreview() {
     CoinSwapTheme {
-        MainScreen()
+        MainScreen(
+            state = MainScreenState(),
+            onEvent = MainScreenEvent
+        )
     }
-}
+}*/
