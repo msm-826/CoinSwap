@@ -1,8 +1,9 @@
-package com.project.coinswap.data.local.entity
+package com.project.coinswap.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.project.coinswap.data.local.entity.CurrencyRateEntity
 
 @Dao
 interface CurrencyRateDao {
