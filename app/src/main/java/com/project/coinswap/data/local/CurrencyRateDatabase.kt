@@ -6,6 +6,7 @@ import com.project.coinswap.data.local.entity.CurrencyRateEntity
 
 @Database(
     entities = [CurrencyRateEntity::class],
+    exportSchema = false,
     version = 1
 )
 abstract class CurrencyRateDatabase: RoomDatabase() {
