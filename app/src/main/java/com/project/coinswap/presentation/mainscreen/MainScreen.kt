@@ -21,13 +21,23 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +52,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.coinswap.R
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     state: MainScreenState,
@@ -58,6 +70,43 @@ fun MainScreen(
         if (state.error != null) {
             Toast.makeText(context, state.error, Toast.LENGTH_LONG).show()
         }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    var sheetDisplayState by remember { mutableStateOf(false) }
+
+    if (sheetDisplayState) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = { sheetDisplayState = false },
+            dragHandle = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BottomSheetDefaults.DragHandle()
+                    Text(
+                        text = stringResource(R.string.select_currency),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_medium)))
+                    Divider()
+                }
+            },
+            content = {
+                BottomSheetContent(
+                    onItemClicked = { currencyCode ->
+                        onEvent(MainScreenEvent.BottomSheetItemClicked(currencyCode))
+                        coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if(!sheetState.isVisible) sheetDisplayState = false
+                        }
+                    },
+                    currenciesList = state.currencyRates.values.toList()
+                )
+            }
+        )
     }
 
     Column(
@@ -91,7 +140,10 @@ fun MainScreen(
                     } else {
                         MaterialTheme.colorScheme.onSurface
                     },
-                    onDropdownIconClicked = { },
+                    onDropdownIconClicked = {
+                        sheetDisplayState = true
+                        onEvent(MainScreenEvent.FromCurrencySelect)
+                    },
                     onCurrencySelect = { onEvent(MainScreenEvent.FromCurrencySelect) },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -107,7 +159,10 @@ fun MainScreen(
                     } else {
                         MaterialTheme.colorScheme.onSurface
                     },
-                    onDropdownIconClicked = { },
+                    onDropdownIconClicked = {
+                        sheetDisplayState = true
+                        onEvent(MainScreenEvent.ToCurrencySelect)
+                    },
                     onCurrencySelect = { onEvent(MainScreenEvent.ToCurrencySelect) },
                     modifier = Modifier.fillMaxWidth()
                 )

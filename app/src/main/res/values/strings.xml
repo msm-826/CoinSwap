@@ -3,4 +3,6 @@
     <string name="coinswap">CoinSwap</string>
     <string name="open_bottom_sheet">Open bottom sheet</string>
     <string name="swap_currency">Swap currency</string>
+    <string name="select_currency">Select Currency</string>
+    <string name="bottom_sheet_currency">%1$s: %2$s</string>
 </resources>
